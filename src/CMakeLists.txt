@@ -22,15 +22,20 @@ set(CMAKE_CXX_FLAGS_ASAN
     CACHE STRING "Flags used by the C++ compiler during AddressSanitizer builds."
     FORCE)
 
+file(GLOB_RECURSE LIB_FILES "${LIB_DIR}/*.c")
+file(GLOB_RECURSE HEADER_FILES "${INCLUDE_DIR}/*.h")
 
 include_directories(${INCLUDE_DIR})
 
 set(SOURCE_FILES main.c)
-add_executable(Main ${SOURCE_FILES})
+add_executable(Main ${SOURCE_FILES} ${HEADER_FILES})
 
-add_library(APInt SHARED
-    ${LIB_DIR}/APInt.c
-)
+foreach(lib_file ${LIB_FILES})
+    get_filename_component(lib_name ${lib_file} NAME_WE)
+    message(${lib_name})
+    message(${lib_file})
+    add_library(${lib_name} SHARED ${lib_file})
+    target_link_libraries(Main ${lib_name})
+endforeach()
 
-target_link_libraries(Main APInt)
-set_property(TARGET Main APInt PROPERTY C_STANDARD 99)
+set_property(TARGET Main PROPERTY C_STANDARD 99)
